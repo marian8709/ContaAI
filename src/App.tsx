@@ -102,8 +102,18 @@ function App() {
             if (categoryFilter !== 'all' && doc.category !== categoryFilter) return false;
             if (dateFilter && doc.documentDate) {
               const docDate = new Date(doc.documentDate.split('.').reverse().join('-'));
-              const filterDate = new Date(dateFilter);
-              return docDate.toDateString() === filterDate.toDateString();
+              const filterParts = dateFilter.split('-');
+              
+              if (filterParts.length === 2) {
+                // Year and month filter
+                const filterYear = parseInt(filterParts[0]);
+                const filterMonth = parseInt(filterParts[1]);
+                return docDate.getFullYear() === filterYear && docDate.getMonth() + 1 === filterMonth;
+              } else if (filterParts.length === 1) {
+                // Year only filter
+                const filterYear = parseInt(filterParts[0]);
+                return docDate.getFullYear() === filterYear;
+              }
             }
             return true;
           })
@@ -146,53 +156,112 @@ function App() {
             </div>
             
             {/* Filter and Sort Controls */}
-            <div className="flex items-center justify-between mb-6 p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl">
-              <div className="flex items-center gap-4">
-                <select 
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="all">Toate categoriile</option>
-                  <option value="Transport">Transport</option>
-                  <option value="Servicii">Servicii</option>
-                  <option value="Materiale">Materiale</option>
-                  <option value="Utilitati">Utilități</option>
-                </select>
-                <select 
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="newest">Cele mai noi</option>
-                  <option value="oldest">Cele mai vechi</option>
-                  <option value="document-date-newest">Data document (nouă)</option>
-                  <option value="document-date-oldest">Data document (veche)</option>
-                  <option value="amount-high">Sumă mare</option>
-                  <option value="amount-low">Sumă mică</option>
-                </select>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-gray-400" />
-                  <input
-                    type="date"
-                    value={dateFilter}
-                    onChange={(e) => setDateFilter(e.target.value)}
-                    className="px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Filtrează după dată"
-                  />
-                  {dateFilter && (
+            <div className="mb-6 p-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                {/* Month Filter */}
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">Luna</label>
+                  <select 
+                    value={dateFilter.split('-')[1] || ''}
+                    onChange={(e) => {
+                      const year = dateFilter.split('-')[0] || new Date().getFullYear().toString();
+                      const month = e.target.value;
+                      setDateFilter(month ? `${year}-${month}` : '');
+                    }}
+                    className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Toate lunile</option>
+                    <option value="01">Ianuarie</option>
+                    <option value="02">Februarie</option>
+                    <option value="03">Martie</option>
+                    <option value="04">Aprilie</option>
+                    <option value="05">Mai</option>
+                    <option value="06">Iunie</option>
+                    <option value="07">Iulie</option>
+                    <option value="08">August</option>
+                    <option value="09">Septembrie</option>
+                    <option value="10">Octombrie</option>
+                    <option value="11">Noiembrie</option>
+                    <option value="12">Decembrie</option>
+                  </select>
+                </div>
+
+                {/* Year Filter */}
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">Anul</label>
+                  <select 
+                    value={dateFilter.split('-')[0] || ''}
+                    onChange={(e) => {
+                      const year = e.target.value;
+                      const month = dateFilter.split('-')[1] || '';
+                      setDateFilter(year && month ? `${year}-${month}` : year ? `${year}` : '');
+                    }}
+                    className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Toți anii</option>
+                    {Array.from({ length: 5 }, (_, i) => {
+                      const year = new Date().getFullYear() - i;
+                      return (
+                        <option key={year} value={year.toString()}>{year}</option>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                {/* Category Filter */}
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">Categoria</label>
+                  <select 
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">Toate categoriile</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Servicii">Servicii</option>
+                    <option value="Materiale">Materiale</option>
+                    <option value="Utilitati">Utilități</option>
+                  </select>
+                </div>
+
+                {/* Sort Filter */}
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">Sortare</label>
+                  <select 
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="newest">Cele mai noi</option>
+                    <option value="oldest">Cele mai vechi</option>
+                    <option value="document-date-newest">Data document (nouă)</option>
+                    <option value="document-date-oldest">Data document (veche)</option>
+                    <option value="amount-high">Sumă mare</option>
+                    <option value="amount-low">Sumă mică</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Filter Actions */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {(dateFilter || categoryFilter !== 'all') && (
                     <button
-                      onClick={() => setDateFilter('')}
-                      className="p-1 hover:bg-white/10 rounded-lg transition-colors"
-                      title="Șterge filtrul de dată"
+                      onClick={() => {
+                        setCategoryFilter('all');
+                        setDateFilter('');
+                        setSortBy('newest');
+                      }}
+                      className="px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-xl text-red-400 hover:bg-red-500/30 transition-colors flex items-center gap-2 text-sm"
                     >
-                      <X className="w-4 h-4 text-gray-400" />
+                      <X className="w-4 h-4" />
+                      Resetează filtrele
                     </button>
                   )}
                 </div>
-              </div>
-              <div className="text-sm text-gray-400">
-                {filteredAndSortedDocuments.length} din {documents.length} documente
+                <div className="text-sm text-gray-400">
+                  {filteredAndSortedDocuments.length} din {documents.length} documente
+                </div>
               </div>
             </div>
 
