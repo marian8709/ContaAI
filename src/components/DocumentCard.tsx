@@ -63,13 +63,13 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document }) => {
             <FileText className="w-7 h-7 text-blue-400" />
           </div>
           <div>
-            <h3 className="text-white font-semibold text-base truncate max-w-[180px] mb-1">
+            <h3 className="text-white font-semibold text-base truncate max-w-[200px] mb-1">
               {document.fileName}
             </h3>
             <div className="flex items-center gap-2">
               <p className="text-gray-400 text-sm">{document.fileSize}</p>
               <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
-              <p className="text-gray-400 text-sm">{document.documentDate || document.uploadedAt.toLocaleDateString('ro-RO')}</p>
+              <p className="text-gray-400 text-sm">{document.uploadedAt.toLocaleDateString('ro-RO')}</p>
             </div>
           </div>
         </div>
@@ -97,99 +97,37 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document }) => {
         </div>
       </div>
 
-      {/* Key Information - Always Visible */}
-      <div className="space-y-3 mb-6">
-        {/* Supplier and Amount */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-gray-400 text-sm">Furnizor:</span>
-            <span className="text-white text-sm font-medium truncate max-w-[120px]">
-              {document.supplier || 'Necunoscut'}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-gray-400 text-sm">Sumă:</span>
-            <span className="text-green-400 text-sm font-bold">
-              {document.amount || 'N/A'}
-            </span>
-          </div>
-        </div>
-        
-        {/* Invoice Number and Date */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-gray-400 text-sm">Nr. Doc:</span>
-            <span className="text-blue-400 text-sm font-medium">
-              {document.invoiceNumber || 'N/A'}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-gray-400 text-sm">Data:</span>
-            <span className="text-white text-sm font-medium">
-              {document.documentDate || 'N/A'}
-            </span>
-          </div>
-        </div>
-        
-        {/* Category and Client */}
-        <div className="flex items-center justify-between">
-          <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${getCategoryColor(document.category)}`}>
-            {document.category || 'Necategorizat'}
-          </span>
-          <div className="flex items-center gap-2">
-            <span className="text-gray-400 text-sm">Client:</span>
-            <span className="text-white text-sm font-medium truncate max-w-[100px]">
-              {document.client || 'N/A'}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Status */}
+      {/* Category and Status */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3 px-3 py-2 bg-white/5 rounded-xl">
-          {getStatusIcon()}
-          <span className="text-sm font-medium text-gray-300">{getStatusText()}</span>
-        </div>
-        {document.geminiAnalysis > 0 && (
-          <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 rounded-xl border border-green-500/20">
-            <Brain className="w-4 h-4 text-green-400" />
-            <span className="text-sm font-medium text-green-400">AI {document.geminiAnalysis}%</span>
-          </div>
-        )}
-      </div>
-
-      {/* Description Preview */}
-      {document.description && (
-        <div className="mb-6 p-3 bg-white/5 rounded-xl border border-white/10">
-          <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed">
-            {document.description}
-          </p>
-        </div>
-      )}
-
-      {/* Quick Actions */}
-      <div className="flex items-center justify-between">
         <span className={`px-4 py-2 rounded-xl text-sm font-semibold ${getCategoryColor(document.category)}`}>
           {document.category || 'Necategorizat'}
         </span>
-        <div className="flex items-center gap-2">
-          <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-            <Eye className="w-4 h-4 text-gray-400" />
-          </button>
-          <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-            <Download className="w-4 h-4 text-gray-400" />
-          </button>
+        <div className="flex items-center gap-3 px-3 py-2 bg-white/5 rounded-xl">
+          {getStatusIcon()}
+          <span className="text-sm font-medium text-gray-300">{getStatusText()}</span>
         </div>
       </div>
 
       {/* Collapsible Content */}
       {isExpanded && (
         <div className="space-y-6">
+      {/* AI Analysis */}
+      {document.geminiAnalysis > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-3 p-3 bg-green-500/10 rounded-xl border border-green-500/20">
+            <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+              <Eye className="w-4 h-4 text-green-400" />
+            </div>
+            <span className="text-sm font-medium text-green-400">
+              Analizat cu Gemini AI ({document.geminiAnalysis}%)
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Document Details */}
       {document.status === 'completed' && (
         <div className="space-y-3 mb-6 p-4 bg-white/5 rounded-xl border border-white/10">
-          <h4 className="text-white font-medium mb-3">Detalii Complete</h4>
           <div className="flex justify-between items-center">
             <span className="text-gray-400 text-sm">Furnizor:</span>
             <span className="text-white text-sm font-semibold">{document.supplier}</span>
@@ -218,6 +156,14 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document }) => {
               <span className="text-white text-sm font-semibold">{document.cui}</span>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Description */}
+      {document.description && (
+        <div className="mb-6 p-4 bg-white/5 rounded-xl border border-white/10">
+          <span className="text-gray-400 text-sm font-medium mb-2 block">Descriere:</span>
+          <p className="text-white text-sm leading-relaxed">{document.description}</p>
         </div>
       )}
 
